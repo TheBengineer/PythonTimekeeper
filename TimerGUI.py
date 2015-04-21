@@ -25,6 +25,7 @@ class TimeKeeper():
         self.cat = 1
         self.midb = 1
         self.mode = 1
+        self.custom = {}
 
         self.typeval = tk.IntVar()
         self.typeval.set(0)
@@ -33,6 +34,8 @@ class TimeKeeper():
 
         self.system = os.sys.platform
         self.home = os.getenv("HOME")
+
+        self.hardware = "" # "N900"
 
 
         # Set up window framework --\/ \/ \/--
@@ -57,7 +60,7 @@ class TimeKeeper():
         self.task2frame.pack(side=tk.TOP, expand=tk.YES, fill=tk.BOTH)
 
         tk.Label(self.containerleft, text="Category", font=self.tfont, justify=tk.CENTER,
-                      background="orange").pack(side=tk.TOP, anchor=tk.W)
+                 background="orange").pack(side=tk.TOP, anchor=tk.W)
         tk.Label(self.containermid, text="Task", font=self.tfont, justify=tk.LEFT, background="purple").pack(
             side=tk.TOP, anchor=tk.W)
         tk.Label(self.containerright, text="Menu", font=self.tfont, justify=tk.LEFT, background="gray").pack(
@@ -67,6 +70,9 @@ class TimeKeeper():
         self.tasklabel = tk.Label(self.task2frame, text="Add:", font=self.tfont, background="gray")
         self.tasklabel.pack(side=tk.RIGHT, anchor=tk.NE)
         # Set up window framework --/\ /\ /\--
+
+        self.path_linux = os.path.join(os.getenv("HOME"), ".timekeeper")
+        self.path_windows = os.path.join(os.getenv("APPDATA"), "Timekeeper")
 
 
     def default(self):
@@ -83,7 +89,7 @@ class TimeKeeper():
         self.master.destroy()
 
 
-    def makebutton(bmaster, btext, bcommand=default, color='blue', font=bfont):
+    def makebutton(bmaster, btext, bcommand=self.default, color='blue', font=self.bfont):
         b = tk.Button(bmaster, font=font, background=color, text=btext, border=2, command=bcommand)
         b.pack(side=tk.TOP)
         return b
@@ -92,32 +98,27 @@ class TimeKeeper():
     def checkdir(self):
         print "Checking for directory"
         if self.system == "linux2":
-            home = os.getenv("HOME")
-            path = os.path.join(home + ".timekeeper")
-            if not os.path.exists(path):
+            if not os.path.exists(self.path_linux):
                 print "Could not find directory, creating..."
-                os.mkdir(path)
+                os.mkdir(self.path_linux)
             else:
                 print "Directory exists"
         elif self.system == "win32":
-            appdata = os.getenv("APPDATA")
-            path = os.path.join(appdata, "Timekeeper")
-            if not os.path.exists(path):
+            if not os.path.exists(self.path_windows):
                 print "Could not find directory, creating..."
-                os.mkdir(path)
+                os.mkdir(self.path_windows)
             else:
                 print "Directory exists"
 
 
     def checkfile(self):
-
         self.checkdir()
         print "Checking to see if config file exists"
         if self.system == "linux2":
-            home = os.getenv("HOME")
-            if os.path.isfile(home + "/.timekeeper/config"):
+            path = os.path.join(self.path_linux, "config.cfg")
+            if os.path.isfile(path):
                 print "File exists, checking for data"
-                if len(open(home + "/.timekeeper/config", 'r').readlines()) > 1:
+                if len(open(path, 'r').readlines()) > 1:
                     print "Data found"
                     return 1
                 else:
@@ -127,12 +128,10 @@ class TimeKeeper():
                 print "No file found"
                 return 0
         if self.system == "win32":
-            appdata = os.getenv("APPDATA")
-            path = os.path.join(appdata, "Timekeeper", "config.cfg")
-            print path
+            path = os.path.join(self.path_windows, "config.cfg")
             if os.path.isfile(path):
                 print "File exists, checking for data"
-                if len(open(path).readlines()) > 1:
+                if len(open(path, 'r').readlines()) > 1:
                     print "Data found"
                     return 1
                 else:
@@ -143,192 +142,184 @@ class TimeKeeper():
                 return 0
 
 
-def custom():
-    global cat
-    global text
-    global modeval
-    global typeval
-    mv = modeval.get()
-    tv = typeval.get()
-    if mv == 1:
-        t = othertext.get()
-        if t != "":
+    def custom(self):
+        mv = self.modeval.get()
+        tv = self.typeval.get()
+        if mv == 1:
+            t = othertext.get()
+            if t != "":
+                if tv == 0:
+                    if len(text[cat - 1]) < 6:
+                        text[cat - 1].append(t)
+                        settnames()
+                    else:
+                        print "Too many buttons in category, item not added"
+                elif tv == 1:
+                    if len(text) < 6:
+                        text.append([t])
+                        setcnames()
+                    else:
+                        print "Too many Categories, item not added"
+                elif tv == 2:
+                    import time
+
+                    print "Writing", text[cat - 1][0] + "," + t, "on", time.asctime()
+                    self.checkdir()
+                    if system == "linux2":
+                        f = open(os.path.join(self.path_linux, "log.csv"), 'a')
+                        f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(t) + "," + str(time.time()) + "\n")
+                        f.close()
+                    if system == "win32":
+                        f = open(os.path.join(self.path_windows, "log.csv"), 'a')
+                        f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(t) + "," + str(time.time()) + "\n")
+                        f.close()  # TODO change this over to CSV
+                    self.close()
+                otherstring.set("")
+        else:
+            if tv == 2:
+                self.dellastlogline()
+
+
+    def writetolog(self, dat=0):
+        if dat == 0:
+            if system == "linux2":
+                f = open(os.path.join(self.path_linux, "log.csv"), 'a')
+                f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+                f.close()
+            if system == "win32":
+                f = open(os.path.join(self.path_windows, "log.csv"), 'a')
+                f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+                f.close()
+        else:
+            if system == "linux2":
+                f = open(os.path.join(self.path_linux, "log.csv"), 'a')
+                f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+                f.close()
+            if system == "win32":
+                f = open(os.path.join(self.path_windows, "log.csv"), 'a')
+                f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+                f.close()
+
+
+    def graph(self):
+        gui = os.popen(runstring)  # TODO fix this
+
+    def oops(self):
+        if system == "linux2":
+            f = open(os.path.join(self.path_linux, "log.csv"), 'a')
+            f.write(time.asctime(time.localtime(time.time() - 900)) + ",Misc,Unknown," + str(time.time() - 900) + "\n")
+            f.close()
+        if system == "win32":
+            f = open(os.path.join(self.path_windows, "log.csv"), 'a')
+            f.write(time.asctime(time.localtime(time.time() - 900)) + ",Misc,Unknown," + str(time.time() - 900) + "\n")
+            f.close()
+
+
+    def setcustom(self):
+        mode = self.modeval.get()
+        tv = self.typeval.get()
+        self.settnames()
+        if mode == 1:
+            self.tasklabel["text"] = "Add:"
             if tv == 0:
-                if len(text[cat - 1]) < 6:
-                    text[cat - 1].append(t)
-                    settnames()
-                else:
-                    print "Too many buttons in category, item not added"
+                self.custom["background"] = "purple"
+                self.custom["text"] = "Add Task:"
             elif tv == 1:
-                if len(text) < 6:
-                    text.append([t])
-                    setcnames()
-                else:
-                    print "Too many Categories, item not added"
+                self.custom["background"] = "orange"
+                self.custom["text"] = "Add Category:"
             elif tv == 2:
-                import time
-
-                print "Writing", text[cat - 1][0] + "," + t, "on", time.asctime()
-                checkdir()
-                if system == "linux2":
-                    f = open(home + "/.timekeeper/log.csv", 'a')
-                    f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(t) + "," + str(time.time()) + "\n")
-                    f.close()
-                if system == "win32":
-                    f = open(home + "\\.timekeeper\\log.csv", 'a')
-                    f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(t) + "," + str(time.time()) + "\n")
-                    f.close()
-                close()
-            otherstring.set("")
-    else:
-        if tv == 2:
-            dellastlogline()
+                self.custom["background"] = "purple"
+                self.custom["text"] = "Add Temp Task:"
+        else:
+            self.tasklabel["text"] = "Del:"
+            if tv == 0:
+                self.custom["background"] = "red"
+                self.custom["text"] = "Select Task to Delete          /\\"
+                self.settnames()
+            elif tv == 1:
+                self.custom["background"] = "red"
+                self.custom["text"] = "Select Category to Delete   /\\"
+                self.setcnames()
+            elif tv == 2:
+                self.custom["background"] = "red"
+                self.custom["text"] = "Delete last Log Entry"
 
 
-def writetolog(dat=0):
-    if dat == 0:
+    def dellastlogline(self):
+        print "Deleting last Log entry"
         if system == "linux2":
-            f = open(home + "/.timekeeper/log.csv", 'a')
-            f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+            f = open(os.path.join(self.path_linux, "log.csv"), 'r')
+            log = f.readlines()[1:-1]
+            f.close()
+            f = open(os.path.join(self.path_linux, "log.csv"), 'w')
+            for line in log:
+                f.write(line)
             f.close()
         if system == "win32":
-            f = open(home + "\\.timekeeper\\log.csv", 'a')
-            f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+            f = open(os.path.join(self.path_windows, "log.csv"), 'r')
+            log = f.readlines()[1:-1]
             f.close()
-    else:
+            f = open(self.fp_windows("log.csv"), 'w')
+            for line in log:
+                f.write(line)
+            f.close()
+
+    def fp_linux(self, filename):
+        pass
+
+    def fp_windows(self, filename):
+        return os.path.join(self.path_windows, "log.csv")
+
+
+    def ringer(self):
+        import os, time
+        if self.hardware == "N900":
+            os.popen(
+                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
+            time.sleep(.1)
+            os.popen(
+                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
+            time.sleep(.1)
+            os.popen(
+                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
+            time.sleep(.1)
+            os.popen(
+                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
+            time.sleep(.1)
+            os.popen(
+                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
+            time.sleep(.1)
+            os.popen(
+                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
+
+
+    def testwrite(self):
+        self.master.destroy()
+
+
+    def writetask(self, i, j):
+        print "Writing", self.text[i - 1][0] + "," + self.text[i - 1][j], "on", time.asctime()
+        if i <= len(text[i - 1]):
+            if system == "linux2":
+                f = open(home + "/.timekeeper/log.csv", 'a')
+                f.write(time.asctime() + "," + text[i - 1][0] + "," + text[i - 1][j] + "," + str(time.time()) + "\n")
+                f.close()
+            if system == "win32":
+                f = open(home + "\\.timekeeper\\log.csv", 'a')
+                f.write(time.asctime() + "," + text[i - 1][0] + "," + text[i - 1][j] + "," + str(time.time()) + "\n")
+                f.close()
+
+
+    def writetime(self, t):
+        print "Writing", t, "to time log on", time.asctime()
         if system == "linux2":
-            f = open(home + "/.timekeeper/log.csv", 'a')
-            f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+            f = open(home + "/.timekeeper/timelog.csv", 'a')
+            f.write(time.asctime() + "," + t + "\n")
             f.close()
         if system == "win32":
-            f = open(home + "\\.timekeeper\\log.csv", 'a')
-            f.write(time.asctime() + "," + text[cat - 1][0] + "," + str(time.time()) + "\n")
+            f = open(home + "\\.timekeeper\\timelog.csv", 'a')
+            f.write(time.asctime() + "," + t + "\n")
             f.close()
-
-
-def graph():
-    gui = os.popen(runstring)
-
-
-def oops():
-    if system == "linux2":
-        f = open(home + "/.timekeeper/log.csv", 'a')
-        f.write(time.asctime(time.localtime(time.time() - 900)) + ",Misc,Unknown," + str(time.time() - 900) + "\n")
-        f.close()
-    if system == "win32":
-        f = open(home + "\\.timekeeper\\log.csv", 'a')
-        f.write(time.asctime(time.localtime(time.time() - 900)) + ",Misc,Unknown," + str(time.time() - 900) + "\n")
-        f.close()
-
-
-def setcustom():
-    global cat
-    global text
-    global typeval
-    global modeval
-    global mode
-    global tasklabel
-    mode = modeval.get()
-    tv = typeval.get()
-    settnames()
-    if mode == 1:
-        tasklabel["text"] = "Add:"
-        if tv == 0:
-            custom["background"] = "purple"
-            custom["text"] = "Add Task:"
-        elif tv == 1:
-            custom["background"] = "orange"
-            custom["text"] = "Add Category:"
-        elif tv == 2:
-            custom["background"] = "purple"
-            custom["text"] = "Add Temp Task:"
-    else:
-        tasklabel["text"] = "Del:"
-        if tv == 0:
-            custom["background"] = "red"
-            custom["text"] = "Select Task to Delete          /\\"
-            settnames()
-        elif tv == 1:
-            custom["background"] = "red"
-            custom["text"] = "Select Category to Delete   /\\"
-            setcnames()
-        elif tv == 2:
-            custom["background"] = "red"
-            custom["text"] = "Delete last Log Entry"
-
-
-def dellastlogline():
-    print "Deleting last Log entry"
-    if system == "linux2":
-        f = open(home + "/.timekeeper/log.csv", 'r')
-        log = f.readlines()[1:-1]
-        f.close()
-        f = open(home + "/.timekeeper/log.csv", 'w')
-        for line in log:
-            f.write(line)
-        f.close()
-    if system == "win32":
-        f = open(home + "\\.timekeeper\\log.csv", 'r')
-        log = f.readlines()[1:-1]
-        f.close()
-        f = open(home + "\\.timekeeper\\log.csv", 'w')
-        for line in log:
-            f.write(line)
-        f.close()
-
-
-def ringer():
-    import os, time
-
-    os.popen(
-        r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
-    time.sleep(.1)
-    os.popen(
-        r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
-    time.sleep(.1)
-    os.popen(
-        r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
-    time.sleep(.1)
-    os.popen(
-        r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
-    time.sleep(.1)
-    os.popen(
-        r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
-    time.sleep(.1)
-    os.popen(
-        r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
-
-
-def testwrite():
-    master.destroy()
-
-
-def writetask(i, j):
-    global text
-    import time
-
-    print "Writing", text[i - 1][0] + "," + text[i - 1][j], "on", time.asctime()
-    if i <= len(text[i - 1]):
-        if system == "linux2":
-            f = open(home + "/.timekeeper/log.csv", 'a')
-            f.write(time.asctime() + "," + text[i - 1][0] + "," + text[i - 1][j] + "," + str(time.time()) + "\n")
-            f.close()
-        if system == "win32":
-            f = open(home + "\\.timekeeper\\log.csv", 'a')
-            f.write(time.asctime() + "," + text[i - 1][0] + "," + text[i - 1][j] + "," + str(time.time()) + "\n")
-            f.close()
-
-
-def writetime(t):
-    print "Writing", t, "to time log on", time.asctime()
-    if system == "linux2":
-        f = open(home + "/.timekeeper/timelog.csv", 'a')
-        f.write(time.asctime() + "," + t + "\n")
-        f.close()
-    if system == "win32":
-        f = open(home + "\\.timekeeper\\timelog.csv", 'a')
-        f.write(time.asctime() + "," + t + "\n")
-        f.close()
 
 
 def buttonhandle():
