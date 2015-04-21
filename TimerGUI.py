@@ -19,6 +19,16 @@ class TimeKeeper():
         self.system = os.sys.platform
         self.home = os.getenv("HOME")
 
+        if self.system == "linux2":
+            self.directory = os.getenv("HOME")
+        elif self.system == "win32":
+            self.directory = os.getenv("APPDATA")
+        else:
+            print "NO MACS EVER! DIE!"
+            print "Because you have a mac, this program will now crash."
+            exit()
+
+
         self.hardware = ""  # "N900"
 
         self.category = []
@@ -70,8 +80,6 @@ class TimeKeeper():
         self.tasklabel.pack(side=tk.RIGHT, anchor=tk.NE)
         # Set up window framework --/\ /\ /\--
 
-        self.path_linux = os.path.join(os.getenv("HOME"), ".timekeeper")
-        self.path_windows = os.path.join(os.getenv("APPDATA"), "Timekeeper")
 
         self.category.append(self.makebutton(self.containerleft, "Schoolwork", self.c1, "orange"))
         self.category.append(self.makebutton(self.containerleft, "People", self.c2, "orange"))
@@ -147,50 +155,29 @@ class TimeKeeper():
 
     def checkdir(self):
         print "Checking for directory"
-        self.system = os.sys.platform
-        if self.system == "linux2":
-            if not os.path.exists(self.path_linux):
-                print "Could not find directory, creating..."
-                os.mkdir(self.path_linux)
-            else:
-                print "Directory exists"
-        elif self.system == "win32":
-            if not os.path.exists(self.path_windows):
-                print "Could not find directory, creating..."
-                os.mkdir(self.path_windows)
-            else:
-                print "Directory exists"
+        if not os.path.exists(self.directory):
+            print "Could not find directory, creating..."
+            os.mkdir(self.directory)
+        else:
+            print "Directory exists"
+
 
 
     def checkfile(self):
         self.checkdir()
         print "Checking to see if config file exists"
-        if self.system == "linux2":
-            path = os.path.join(self.path_linux, "config.cfg")
-            if os.path.isfile(path):
-                print "File exists, checking for data"
-                if len(open(path, 'r').readlines()) > 1:
-                    print "Data found"
-                    return 1
-                else:
-                    print "No data found"
-                    return 0
+        path = os.path.join(self.directory, "config.cfg")
+        if os.path.isfile(path):
+            print "File exists, checking for data"
+            if len(open(path, 'r').readlines()) > 1:
+                print "Data found"
+                return 1
             else:
-                print "No file found"
+                print "No data found"
                 return 0
-        if self.system == "win32":
-            path = os.path.join(self.path_windows, "config.cfg")
-            if os.path.isfile(path):
-                print "File exists, checking for data"
-                if len(open(path, 'r').readlines()) > 1:
-                    print "Data found"
-                    return 1
-                else:
-                    print "No data found"
-                    return 0
-            else:
-                print "No file found"
-                return 0
+        else:
+            print "No file found"
+            return 0
 
 
     def custom(self):
