@@ -8,7 +8,7 @@ import time
 
 class TimeKeeper():
     def __init__(self):
-        t = time.time()
+        self.t = time.time()
 
         self.master = tk.Tk()
 
@@ -276,9 +276,9 @@ class TimeKeeper():
 
     def open_file(self, filename, mode):
         if self.system == "linux2":
-            return open(os.path.join(self.path_linux, filename), mode)
+            return open(os.path.join(self.directory, filename), mode)
         elif self.system == "win32":
-            return open(os.path.join(self.path_windows, filename), mode)
+            return open(os.path.join(self.directory, filename), mode)
         else:
             print "NO MACS EVER! DIE!"
             print "Because you have a mac, this program will now crash."
@@ -471,7 +471,7 @@ class TimeKeeper():
         print "Reading config file"
         self.text = []
         if self.checkfile():
-            f = self.open_file("config.cfg", "w")
+            f = self.open_file("config.cfg", "r")
             for line in f.readlines():
                 if line[0] == "[":
                     self.text.append([line[1:-1]])
