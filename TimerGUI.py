@@ -1,146 +1,146 @@
 __author__ = 'boh01'
 #!/bin/python
 
-import Tkinter
+import Tkinter as tk
 import os
 import time
 
-t = time.time()
 
-master = Tkinter.Tk()
+class TimeKeeper():
+    def __init(self):
+        t = time.time()
 
-bfont = "Arial 30 bold"
-tfont = "Arial 20 bold"
-mfont = "Arial 30 bold"
+        self.master = tk.Tk()
 
-category = []
-item = []
-misc = []
-text = []
-rbmode = []
-rbtype = []
-cat = 1
-midb = 1
-mode = 1
+        self.bfont = "Arial 30 bold"
+        self.tfont = "Arial 20 bold"
+        self.mfont = "Arial 30 bold"
 
-typeval = Tkinter.IntVar()
-typeval.set(0)
-modeval = Tkinter.IntVar()
-modeval.set(1)
+        self.category = []
+        self.item = []
+        self.misc = []
+        self.text = []
+        self.rbmode = []
+        self.rbtype = []
+        self.cat = 1
+        self.midb = 1
+        self.mode = 1
 
-system = os.sys.platform
-home = os.getenv("HOME")
+        self.typeval = tk.IntVar()
+        self.typeval.set(0)
+        self.modeval = tk.IntVar()
+        self.modeval.set(1)
 
-
-# Set up window framework --\/ \/ \/--
-master.title("Simple Python Time Tracker")
-
-container = Tkinter.Frame(master)
-container.pack(expand=Tkinter.YES, fill=Tkinter.BOTH)
-containerright = Tkinter.Frame(container, background="cyan", borderwidth=5, relief=Tkinter.RIDGE, width=200)
-containerright.pack(side=Tkinter.RIGHT, expand=Tkinter.YES, fill=Tkinter.BOTH)
-textframe = Tkinter.Frame(container, background="cyan", borderwidth=5, relief=Tkinter.RIDGE, width=200)
-textframe.pack(fill=Tkinter.X, side=Tkinter.BOTTOM)
-containerleft = Tkinter.Frame(container, background="cyan", borderwidth=5, relief=Tkinter.RIDGE, width=200)
-containerleft.pack(side=Tkinter.LEFT, expand=Tkinter.YES, fill=Tkinter.BOTH)
-containermid = Tkinter.Frame(container, background="cyan", borderwidth=5, relief=Tkinter.RIDGE, width=200)
-containermid.pack(side=Tkinter.LEFT, expand=Tkinter.YES, fill=Tkinter.BOTH)
-
-taskframe = Tkinter.Frame(containerright, background="cyan", borderwidth=5, relief=Tkinter.RIDGE, width=200)
-taskframe.pack(side=Tkinter.BOTTOM, expand=Tkinter.YES, fill=Tkinter.BOTH)
-modeframe = Tkinter.Frame(containerright, background="cyan", borderwidth=5, relief=Tkinter.RIDGE, width=200)
-modeframe.pack(side=Tkinter.BOTTOM, expand=Tkinter.YES, fill=Tkinter.BOTH)
-task2frame = Tkinter.Frame(taskframe, background="cyan", width=200)
-task2frame.pack(side=Tkinter.TOP, expand=Tkinter.YES, fill=Tkinter.BOTH)
-
-Tkinter.Label(containerleft, text="Category", font=tfont, justify=Tkinter.CENTER, background="orange").pack(
-    side=Tkinter.TOP, anchor=Tkinter.W)
-Tkinter.Label(containermid, text="Task", font=tfont, justify=Tkinter.LEFT, background="purple").pack(side=Tkinter.TOP,
-                                                                                                     anchor=Tkinter.W)
-Tkinter.Label(containerright, text="Menu", font=tfont, justify=Tkinter.LEFT, background="gray").pack(side=Tkinter.TOP,
-                                                                                                     anchor=Tkinter.W)
-Tkinter.Label(modeframe, text="Mode", font=tfont, justify=Tkinter.RIGHT, background="gray").pack(side=Tkinter.RIGHT,
-                                                                                                 anchor=Tkinter.NE)
-tasklabel = Tkinter.Label(task2frame, text="Add:", font=tfont, background="gray")
-tasklabel.pack(side=Tkinter.RIGHT, anchor=Tkinter.NE)
-# Set up window framework --/\ /\ /\--
+        self.system = os.sys.platform
+        self.home = os.getenv("HOME")
 
 
+        # Set up window framework --\/ \/ \/--
+        self.master.title("Simple Python Time Tracker")
 
-def default():
-    pass
+        self.container = tk.Frame(self.master)
+        self.container.pack(expand=tk.YES, fill=tk.BOTH)
+        self.containerright = tk.Frame(self.container, background="cyan", borderwidth=5, relief=tk.RIDGE, width=200)
+        self.containerright.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.BOTH)
+        self.textframe = tk.Frame(self.container, background="cyan", borderwidth=5, relief=tk.RIDGE, width=200)
+        self.textframe.pack(fill=tk.X, side=tk.BOTTOM)
+        self.containerleft = tk.Frame(self.container, background="cyan", borderwidth=5, relief=tk.RIDGE, width=200)
+        self.containerleft.pack(side=tk.LEFT, expand=tk.YES, fill=tk.BOTH)
+        self.containermid = tk.Frame(self.container, background="cyan", borderwidth=5, relief=tk.RIDGE, width=200)
+        self.containermid.pack(side=tk.LEFT, expand=tk.YES, fill=tk.BOTH)
 
+        self.taskframe = tk.Frame(self.containerright, background="cyan", borderwidth=5, relief=tk.RIDGE, width=200)
+        self.taskframe.pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
+        self.modeframe = tk.Frame(self.containerright, background="cyan", borderwidth=5, relief=tk.RIDGE, width=200)
+        self.modeframe.pack(side=tk.BOTTOM, expand=tk.YES, fill=tk.BOTH)
+        self.task2frame = tk.Frame(self.taskframe, background="cyan", width=200)
+        self.task2frame.pack(side=tk.TOP, expand=tk.YES, fill=tk.BOTH)
 
-def test(t=0):
-    print "Event called"
-    item[2]["background"] = "RED"
-
-
-def close():
-    writefile()
-    master.destroy()
-
-
-def makebutton(bmaster, btext, bcommand=default, color='blue', font=bfont):
-    b = Tkinter.Button(bmaster, font=font, background=color, text=btext, border=2, command=bcommand)
-    b.pack(side=Tkinter.TOP)
-    return b
-
-
-def checkdir():
-    print "Checking for directory"
-    system = os.sys.platform
-    if system == "linux2":
-        home = os.getenv("HOME")
-        if not os.path.exists(home + "/.timekeeper/"):
-            print "Could not find directory, creating..."
-            os.popen("mkdir /home/user/.timekeeper/")
-        else:
-            print "Directory exists"
-    elif system == "win32":
-        appdata = os.getenv("APPDATA")
-        path = os.path.join(appdata, "Timekeeper")
-        if not os.path.exists(path):
-            print "Could not find directory, creating..."
-            os.mkdir(path)
-        else:
-            print "Directory exists"
+        tk.Label(self.containerleft, text="Category", font=self.tfont, justify=tk.CENTER,
+                      background="orange").pack(side=tk.TOP, anchor=tk.W)
+        tk.Label(self.containermid, text="Task", font=self.tfont, justify=tk.LEFT, background="purple").pack(
+            side=tk.TOP, anchor=tk.W)
+        tk.Label(self.containerright, text="Menu", font=self.tfont, justify=tk.LEFT, background="gray").pack(
+            side=tk.TOP, anchor=tk.W)
+        tk.Label(self.modeframe, text="Mode", font=self.tfont, justify=tk.RIGHT, background="gray").pack(
+            side=tk.RIGHT, anchor=tk.NE)
+        self.tasklabel = tk.Label(self.task2frame, text="Add:", font=self.tfont, background="gray")
+        self.tasklabel.pack(side=tk.RIGHT, anchor=tk.NE)
+        # Set up window framework --/\ /\ /\--
 
 
-def checkfile():
-    import os
+    def default(self):
+        pass
 
-    system = os.sys.platform
-    checkdir()
-    print "Checking to see if config file exists"
-    if system == "linux2":
-        home = os.getenv("HOME")
-        if os.path.isfile(home + "/.timekeeper/config"):
-            print "File exists, checking for data"
-            if len(open(home + "/.timekeeper/config", 'r').readlines()) > 1:
-                print "Data found"
-                return 1
+
+    def test(self, t=0):
+        print "Event called"
+        item[2]["background"] = "RED"
+
+
+    def close(self):
+        self.writefile()
+        self.master.destroy()
+
+
+    def makebutton(bmaster, btext, bcommand=default, color='blue', font=bfont):
+        b = tk.Button(bmaster, font=font, background=color, text=btext, border=2, command=bcommand)
+        b.pack(side=tk.TOP)
+        return b
+
+
+    def checkdir(self):
+        print "Checking for directory"
+        if self.system == "linux2":
+            home = os.getenv("HOME")
+            path = os.path.join(home + ".timekeeper")
+            if not os.path.exists(path):
+                print "Could not find directory, creating..."
+                os.mkdir(path)
             else:
-                return 0
-                print "No data found"
-        else:
-            return 0
-            print "No file found"
-    if system == "win32":
-        appdata = os.getenv("APPDATA")
-        path = os.path.join(appdata, "Timekeeper", "config.cfg")
-        print path
-        if os.path.isfile(path):
-            print "File exists, checking for data"
-            if len(open(path).readlines()) > 1:
-                print "Data found"
-                return 1
+                print "Directory exists"
+        elif self.system == "win32":
+            appdata = os.getenv("APPDATA")
+            path = os.path.join(appdata, "Timekeeper")
+            if not os.path.exists(path):
+                print "Could not find directory, creating..."
+                os.mkdir(path)
             else:
+                print "Directory exists"
+
+
+    def checkfile(self):
+
+        self.checkdir()
+        print "Checking to see if config file exists"
+        if self.system == "linux2":
+            home = os.getenv("HOME")
+            if os.path.isfile(home + "/.timekeeper/config"):
+                print "File exists, checking for data"
+                if len(open(home + "/.timekeeper/config", 'r').readlines()) > 1:
+                    print "Data found"
+                    return 1
+                else:
+                    print "No data found"
+                    return 0
+            else:
+                print "No file found"
                 return 0
-                print "No data found"
-        else:
-            return 0
-            print "No file found"
+        if self.system == "win32":
+            appdata = os.getenv("APPDATA")
+            path = os.path.join(appdata, "Timekeeper", "config.cfg")
+            print path
+            if os.path.isfile(path):
+                print "File exists, checking for data"
+                if len(open(path).readlines()) > 1:
+                    print "Data found"
+                    return 1
+                else:
+                    print "No data found"
+                    return 0
+            else:
+                print "No file found"
+                return 0
 
 
 def custom():
@@ -541,38 +541,38 @@ category.append(makebutton(containerleft, "Projects", c3, "orange"))
 category.append(makebutton(containerleft, "Class", c4, "orange"))
 category.append(makebutton(containerleft, "Misc", c5, "orange"))
 category.append(makebutton(containerleft, "Other", c6, "orange"))
-custom = Tkinter.Button(textframe, text="Add Task:", font="Arial 27 bold", command=custom, background="purple")
-custom.pack(side=Tkinter.LEFT)
+custom = tk.Button(textframe, text="Add Task:", font="Arial 27 bold", command=custom, background="purple")
+custom.pack(side=tk.LEFT)
 
 item.append(makebutton(containermid, "test1", b1, "purple"))
 item.append(makebutton(containermid, "test2", b2, "purple"))
 item.append(makebutton(containermid, "test3", b3, "purple"))
 item.append(makebutton(containermid, "test4", b4, "purple"))
 item.append(makebutton(containermid, "Other", b5, "purple"))
-otherstring = Tkinter.StringVar()
-othertext = Tkinter.Entry(textframe, font=bfont, textvariable=otherstring)
-othertext.pack(side=Tkinter.RIGHT)
+otherstring = tk.StringVar()
+othertext = tk.Entry(textframe, font=bfont, textvariable=otherstring)
+othertext.pack(side=tk.RIGHT)
 
 misc.append(makebutton(containerright, "OOPS", oops, 'red', bfont))
 
 rbmode.append(
-    Tkinter.Radiobutton(modeframe, text="Add", variable=modeval, value=1, font=mfont, indicatoron=0, background="green",
-                        command=setcustom))
+    tk.Radiobutton(modeframe, text="Add", variable=modeval, value=1, font=mfont, indicatoron=0, background="green",
+                   command=setcustom))
 rbmode.append(
-    Tkinter.Radiobutton(modeframe, text="Del", variable=modeval, value=2, font=mfont, indicatoron=0, background="red",
-                        command=setcustom))
-rbmode[0].pack(anchor=Tkinter.W)
-rbmode[1].pack(anchor=Tkinter.W)
+    tk.Radiobutton(modeframe, text="Del", variable=modeval, value=2, font=mfont, indicatoron=0, background="red",
+                   command=setcustom))
+rbmode[0].pack(anchor=tk.W)
+rbmode[1].pack(anchor=tk.W)
 
-rbtype.append(Tkinter.Radiobutton(task2frame, text="Task", variable=typeval, value=0, font=mfont, indicatoron=0,
-                                  background="purple", command=setcustom))
-rbtype.append(Tkinter.Radiobutton(taskframe, text="Category", variable=typeval, value=1, font=mfont, indicatoron=0,
-                                  background="orange", command=setcustom))
-rbtype.append(Tkinter.Radiobutton(taskframe, text="Temp Task", variable=typeval, value=2, font=mfont, indicatoron=0,
-                                  background="purple", command=setcustom))
-rbtype[0].pack(anchor=Tkinter.W)
-rbtype[1].pack(anchor=Tkinter.W)
-rbtype[2].pack(anchor=Tkinter.W)
+rbtype.append(tk.Radiobutton(task2frame, text="Task", variable=typeval, value=0, font=mfont, indicatoron=0,
+                             background="purple", command=setcustom))
+rbtype.append(tk.Radiobutton(taskframe, text="Category", variable=typeval, value=1, font=mfont, indicatoron=0,
+                             background="orange", command=setcustom))
+rbtype.append(tk.Radiobutton(taskframe, text="Temp Task", variable=typeval, value=2, font=mfont, indicatoron=0,
+                             background="purple", command=setcustom))
+rbtype[0].pack(anchor=tk.W)
+rbtype[1].pack(anchor=tk.W)
+rbtype[2].pack(anchor=tk.W)
 
 readfile()
 setcnames()
