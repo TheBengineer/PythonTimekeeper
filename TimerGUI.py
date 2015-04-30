@@ -5,6 +5,8 @@ import Tkinter as tk
 import os
 import time
 
+ADD = 1
+DELETE = 2
 
 class TimeKeeper():
     def __init__(self):
@@ -38,7 +40,7 @@ class TimeKeeper():
         self.rbtype = []
         self.cat = 1
         self.midb = 1
-        self.mode = 1
+        self.mode = ADD
         self.custom = {}
 
         self.typeval = tk.IntVar()
@@ -80,11 +82,12 @@ class TimeKeeper():
         # Set up window framework --/\ /\ /\--
 
 
-        self.category.append(self.makebutton(self.containerleft, "Tom", self.c1, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "Dave", self.c2, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "Ben", self.c3, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "Misc", self.c5, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "Other", self.c6, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "", self.c1, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "", self.c2, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "", self.c3, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "", self.c4, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "", self.c5, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "", self.c6, "orange"))
         custom = tk.Button(self.textframe, text="Add Task:", font="Arial 27 bold", command=self.custom,
                            background="purple")
         custom.pack(side=tk.LEFT)
@@ -101,11 +104,11 @@ class TimeKeeper():
         self.misc.append(self.makebutton(self.containerright, "OOPS", self.oops, 'red', self.bfont))
 
         self.rbmode.append(
-            tk.Radiobutton(self.modeframe, text="Add", variable=self.modeval, value=1, font=self.mfont, indicatoron=0,
+            tk.Radiobutton(self.modeframe, text="Add", variable=self.modeval, value=ADD, font=self.mfont, indicatoron=0,
                            background="green",
                            command=self.setcustom))
         self.rbmode.append(
-            tk.Radiobutton(self.modeframe, text="Del", variable=self.modeval, value=2, font=self.mfont, indicatoron=0,
+            tk.Radiobutton(self.modeframe, text="Del", variable=self.modeval, value=DELETE, font=self.mfont, indicatoron=0,
                            background="red",
                            command=self.setcustom))
         self.rbmode[0].pack(anchor=tk.W)
@@ -171,24 +174,24 @@ class TimeKeeper():
             return 0
 
     def custom(self):
-        mv = self.modeval.get()
-        tv = self.typeval.get()
-        if mv == 1:
+        add_mode = self.modeval.get()
+        task_mode = self.typeval.get()
+        if add_mode == ADD:
             t = self.othertext.get()
             if t != "":
-                if tv == 0:
+                if task_mode == 0:
                     if len(self.text[self.cat - 1]) < 6:
                         self.text[self.cat - 1].append(t)
                         self.settnames()
                     else:
                         print "Too many buttons in category, item not added"
-                elif tv == 1:
+                elif task_mode == 1:
                     if len(self.text) < 6:
                         self.text.append([t])
                         self.setcnames()
                     else:
                         print "Too many Categories, item not added"
-                elif tv == 2:
+                elif task_mode == 2:
                     import time
 
                     print "Writing", self.text[self.cat - 1][0] + "," + t, "on", time.asctime()
@@ -289,10 +292,10 @@ class TimeKeeper():
 
     def buttonhandle(self):
         tv = self.typeval.get()
-        if self.mode == 1:
+        if self.mode == ADD:
             self.writetask(self.cat, self.midb)
             self.close()
-        if self.mode == 2:
+        if self.mode == DELETE:
             if tv == 0:
                 self.text[self.cat - 1][self.midb] = ""
                 self.text[self.cat - 1].remove("")
@@ -357,7 +360,7 @@ class TimeKeeper():
             print "Resetting task buttons to category names"
             for i in range(len(self.text)):
                 self.item[i]["text"] = self.text[i][0]
-                if self.mode == 1:
+                if self.mode == ADD:
                     self.item[i]["background"] = "purple"
                 else:
                     self.item[i]["background"] = "red"
@@ -366,7 +369,7 @@ class TimeKeeper():
             print "Resetting task buttons to", self.text[self.cat - 1][0]
             for i in range(len(self.text[self.cat - 1]) - 1):
                 self.item[i]["text"] = self.text[self.cat - 1][i + 1]
-                if self.mode == 1:
+                if self.mode == ADD:
                     self.item[i]["background"] = "purple"
                 else:
                     self.item[i]["background"] = "red"
