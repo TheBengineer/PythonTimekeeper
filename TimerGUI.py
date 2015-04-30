@@ -22,7 +22,7 @@ class TimeKeeper():
         if self.system == "linux2":
             self.directory = os.getenv("HOME")
         elif self.system == "win32":
-            self.directory = os.getenv("APPDATA")
+            self.directory = os.path.join(os.getenv("APPDATA"), "Timekeeper")
         else:
             print "NO MACS EVER! DIE!"
             print "Because you have a mac, this program will now crash."
@@ -81,10 +81,9 @@ class TimeKeeper():
         # Set up window framework --/\ /\ /\--
 
 
-        self.category.append(self.makebutton(self.containerleft, "Schoolwork", self.c1, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "People", self.c2, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "Projects", self.c3, "orange"))
-        self.category.append(self.makebutton(self.containerleft, "Class", self.c4, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "Tom", self.c1, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "Dave", self.c2, "orange"))
+        self.category.append(self.makebutton(self.containerleft, "Ben", self.c3, "orange"))
         self.category.append(self.makebutton(self.containerleft, "Misc", self.c5, "orange"))
         self.category.append(self.makebutton(self.containerleft, "Other", self.c6, "orange"))
         custom = tk.Button(self.textframe, text="Add Task:", font="Arial 27 bold", command=self.custom,
@@ -285,29 +284,6 @@ class TimeKeeper():
             exit()
 
 
-    def ringer(self):
-        import os, time
-
-        if self.hardware == "N900":
-            os.popen(
-                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
-            time.sleep(.1)
-            os.popen(
-                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
-            time.sleep(.1)
-            os.popen(
-                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
-            time.sleep(.1)
-            os.popen(
-                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
-            time.sleep(.1)
-            os.popen(
-                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_activate string:'PatternIncomingCall'")
-            time.sleep(.1)
-            os.popen(
-                r"dbus-send --print-reply --system --dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request.req_vibrator_pattern_deactivate string:'PatternIncomingCall'")
-
-
     def testwrite(self):
         self.master.destroy()
 
@@ -441,13 +417,12 @@ class TimeKeeper():
 
         print "Writing new file"
         f = self.open_file("config.cfg", "w")
-        lwrite(f, "[Schoolwork")
-        lwrite(f, "ClassA\nClassB\nClassC\nClassD\nClassE")
-        lwrite(f, "[People")
-        lwrite(f, "Brittany")
-        lwrite(f, "[Projects")
-        lwrite(f, "Cornell")
-        lwrite(f, "Python")
+        lwrite(f, "[Tom")
+        lwrite(f, "Emails\nTickets")
+        lwrite(f, "[Dave")
+        lwrite(f, "Japan")
+        lwrite(f, "Markem")
+        lwrite(f, "[Other People")
         lwrite(f, "[Misc")
         lwrite(f, "[Other")
         f.close()
@@ -486,7 +461,6 @@ class TimeKeeper():
         self.readfile()
         self.setcnames()
         self.settnames()
-        self.ringer()
         self.master.mainloop()
         self.writetime(str(time.time() - self.t))
         exit()
