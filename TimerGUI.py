@@ -126,20 +126,16 @@ class TimeKeeper():
         self.rbtype[1].pack(anchor=tk.W)
         self.rbtype[2].pack(anchor=tk.W)
 
-
     def default(self):
         pass
-
 
     def test(self, t=0):
         print "Event called"
         self.item[2]["background"] = "RED"
 
-
     def close(self):
         self.writefile()
         self.master.destroy()
-
 
     def makebutton(self, bmaster, btext, bcommand=None, color='blue', font=None):
         if not bcommand:
@@ -150,7 +146,6 @@ class TimeKeeper():
         b.pack(side=tk.TOP)
         return b
 
-
     def checkdir(self):
         print "Checking for directory"
         if not os.path.exists(self.directory):
@@ -158,7 +153,6 @@ class TimeKeeper():
             os.mkdir(self.directory)
         else:
             print "Directory exists"
-
 
     def checkfile(self):
         self.checkdir()
@@ -175,7 +169,6 @@ class TimeKeeper():
         else:
             print "No file found"
             return 0
-
 
     def custom(self):
         mv = self.modeval.get()
@@ -210,7 +203,6 @@ class TimeKeeper():
             if tv == 2:
                 self.dellastlogline()
 
-
     def writetolog(self, dat=0):
         if dat == 0:  # TODO What does this do?
             f = self.open_file("log.csv", 'a')
@@ -221,7 +213,6 @@ class TimeKeeper():
             f.write(time.asctime() + "," + self.text[self.cat - 1][0] + "," + str(time.time()) + "\n")
             f.close()
 
-
     def graph(self):
         gui = os.popen(runstring)  # TODO fix this
 
@@ -229,7 +220,6 @@ class TimeKeeper():
         f = self.open_file("log.csv", 'a')
         f.write(time.asctime(time.localtime(time.time() - 900)) + ",Misc,Unknown," + str(time.time() - 900) + "\n")
         f.close()
-
 
     def setcustom(self):
         mode = self.modeval.get()
@@ -260,7 +250,6 @@ class TimeKeeper():
                 self.custom["background"] = "red"
                 self.custom["text"] = "Delete last Log Entry"
 
-
     def dellastlogline(self):
         print "Deleting last Log entry"
         f = self.open_file("log.csv", 'r')
@@ -281,10 +270,8 @@ class TimeKeeper():
             print "Because you have a mac, this program will now crash."
             exit()
 
-
     def testwrite(self):
         self.master.destroy()
-
 
     def writetask(self, i, j):
         print "Writing", self.text[i - 1][0] + "," + self.text[i - 1][j], "on", time.asctime()
@@ -299,7 +286,6 @@ class TimeKeeper():
         f = self.open_file("timelog.csv", 'a')
         f.write(time.asctime() + "," + t + "\n")
         f.close()
-
 
     def buttonhandle(self):
         tv = self.typeval.get()
@@ -316,31 +302,25 @@ class TimeKeeper():
                 self.setcnames()
                 self.settnames()
 
-
     def b1(self):
         self.midb = 1
         self.buttonhandle()
-
 
     def b2(self):
         self.midb = 2
         self.buttonhandle()
 
-
     def b3(self):
         self.midb = 3
         self.buttonhandle()
-
 
     def b4(self):
         self.midb = 4
         self.buttonhandle()
 
-
     def b5(self):
         self.midb = 5
         self.buttonhandle()
-
 
     def b6(self):
         self.midb = 6
@@ -350,31 +330,25 @@ class TimeKeeper():
         self.cat = 1
         self.settnames()
 
-
     def c2(self):
         self.cat = 2
         self.settnames()
-
 
     def c3(self):
         self.cat = 3
         self.settnames()
 
-
     def c4(self):
         self.cat = 4
         self.settnames()
-
 
     def c5(self):
         self.cat = 5
         self.settnames()
 
-
     def c6(self):
         self.cat = 6
         self.settnames()
-
 
     def settnames(self):
         for i in range(len(self.item)):
@@ -398,7 +372,6 @@ class TimeKeeper():
                     self.item[i]["background"] = "red"
                 self.item[i].pack()
 
-
     def setcnames(self):
         print "Resetting category button names"
         for i in range(len(self.category)):
@@ -406,7 +379,6 @@ class TimeKeeper():
         for i in range(len(self.text)):
             self.category[i]["text"] = self.text[i][0]
             self.category[i].pack()
-
 
     def writenewfile(self):
 
@@ -425,7 +397,6 @@ class TimeKeeper():
         lwrite(f, "[Other")
         f.close()
 
-
     def writefile(self):
         self.checkdir()
         print "writing changes to new config file"
@@ -438,7 +409,6 @@ class TimeKeeper():
                     f.write(self.text[i][j])
                 f.write("\n")
         f.close()
-
 
     def readfile(self):
         print "Reading config file"
