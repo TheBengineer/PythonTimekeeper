@@ -28,7 +28,6 @@ class TimeKeeper():
             print "Because you have a mac, this program will now crash."
             exit()
 
-
         self.hardware = ""  # "N900"
 
         self.category = []
@@ -159,7 +158,6 @@ class TimeKeeper():
             os.mkdir(self.directory)
         else:
             print "Directory exists"
-
 
 
     def checkfile(self):
