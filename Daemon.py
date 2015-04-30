@@ -1,12 +1,11 @@
 __author__ = 'boh01'
 #!/bin/python
 import time, os, datetime
-home = os.getenv("HOME")
-runstring = "python "+home +"/.timekeeper/TimerGUI.py"
+import TimerGUI
+
 while 1:
-    gui=os.popen(runstring)
     print "Running time tracker"
-    for line in gui:
-        print line,
+    t = TimerGUI.TimeKeeper()
+    t.run()
     print "\n Running again in 15 minutes"
     time.sleep(60*15)
