@@ -4,6 +4,8 @@ __author__ = 'boh01'
 import Tkinter as tk
 import os
 import time
+from functools import partial
+
 
 ADD = 1
 DELETE = 2
@@ -136,12 +138,13 @@ class TimeKeeper():
 
     def build_categories(self):
         print "Building Category buttons"
-        for i in self.category:
-            i.pack_forget()
+        for category_button in self.category:
+            category_button.pack_forget()
         self.category = []
         for index, category in enumerate(self.buttons_text):
             category_name = category[0]
-            self.category.append(self.makebutton(self.containerleft, category_name, lambda: self.category_button(index), "orange"))
+            button_call = partial(self.category_button, index+1) # TODO Grrrr, non 0 based counting. What was I thinking?
+            self.category.append(self.makebutton(self.containerleft, category_name, button_call, "orange"))
 
     def build_tasks(self):
         print "Building Category buttons"
@@ -355,11 +358,12 @@ class TimeKeeper():
 
     def category_button(self, cat_num):
         self.cat = cat_num
+        print cat_num
         self.settnames()
 
     def settnames(self):
-        for i in range(len(self.item)):
-            self.item[i].pack_forget()
+        for item in self.item:
+            item.pack_forget()
         if self.typeval.get() == 1:
             print "Resetting task buttons to category names"
             for i in range(len(self.buttons_text)):
@@ -371,20 +375,20 @@ class TimeKeeper():
                 self.item[i].pack()
         else:
             print "Resetting task buttons to", self.buttons_text[self.cat - 1][0]
-            for i in range(len(self.buttons_text[self.cat - 1]) - 1):
-                self.item[i]["text"] = self.buttons_text[self.cat - 1][i + 1]
+            for item_num, task_text in enumerate(self.buttons_text[self.cat - 1][1:]): # Gets all the tasks from the text tuple
+                self.item[item_num]["text"] = task_text
                 if self.mode == ADD:
-                    self.item[i]["background"] = "purple"
+                    self.item[item_num]["background"] = "purple"
                 else:
-                    self.item[i]["background"] = "red"
-                self.item[i].pack()
+                    self.item[item_num]["background"] = "red"
+                self.item[item_num].pack()
 
     def setcnames(self):
         print "Resetting category button names"
         for button in self.category:
             button.pack_forget()
         for index, text in enumerate(self.buttons_text):
-            self.category[index]["text"] = text[index][0]
+            self.category[index]["text"] = text[0]
             self.category[index].pack()
 
     def writenewfile(self):
