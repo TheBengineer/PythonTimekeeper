@@ -22,7 +22,6 @@ class TimeKeeper():
         self.mfont = "Arial 30 bold"
 
         self.system = os.sys.platform
-        self.home = os.getenv("HOME")
 
         if self.system == "linux2":
             self.directory = os.getenv("HOME")
@@ -33,19 +32,18 @@ class TimeKeeper():
             print "Because you have a mac, this program will now crash."
             exit()
 
-        self.hardware = ""  # "N900"
 
-        self.category = []
+        self.categories = []
         self.tasks = []
+        self.buttons_text = {}
+
         self.misc = []
-        se = []
         self.rbmode = []
         self.rbtype = []
         self.cat = 1
         self.midb = 1
         self.mode = ADD
         self.custom = {}
-        self.buttons_text = []
 
         self.typeval = tk.IntVar()
         self.typeval.set(0)
@@ -125,15 +123,13 @@ class TimeKeeper():
 
     def build_categories(self):
         print "Building Category buttons"
-        for category_button in self.category:
+        for category_button in self.categories:
             category_button.pack_forget()
             category_button.destroy()
-        self.category = []
-        for index, category in enumerate(self.buttons_text):
-            category_name = category[0]
-            button_call = partial(self.category_button,
-                                  index + 1)  # TODO Grrrr, non 0 based counting. What was I thinking?
-            self.category.append(self.makebutton(self.containerleft, category_name, button_call, "orange"))
+        self.categories = []
+        for index, category_name in enumerate(self.buttons_text):
+            button_call = partial(self.category_button, index)
+            self.categories.append(self.makebutton(self.containerleft, category_name, button_call, "orange"))
 
     def build_tasks(self):
         print "Assigning Category buttons"
@@ -142,8 +138,7 @@ class TimeKeeper():
             task_button.destroy()
         self.tasks = []
         for index in range(1, 6):
-            button_call = partial(self.buttonhandle,
-                                  index + 1)  # TODO Grrrr, non 0 based counting. What was I thinking?
+            button_call = partial(self.buttonhandle, index)
             self.tasks.append(self.makebutton(self.containermid, "", button_call, "purple"))
         self.set_task_names()
 
@@ -194,45 +189,38 @@ class TimeKeeper():
     def add_del_tasks(self):
         add_mode = self.modeval.get()
         task_mode = self.typeval.get()
+        new_text = self.othertext.get()
         if add_mode == ADD:
-            t = self.othertext.get()
-            if t != "":
+            if new_text != "":
                 if task_mode == 0:
-                    if len(self.buttons_text[self.cat - 1]) < 6:
-                        self.buttons_text[self.cat - 1].append(t)
-                        self.set_task_names()
+                    if self.cat in self.buttons_text:
+                        if len(self.buttons_text[self.cat]) < 6:
+                            self.buttons_text[self.cat].append(new_text)
+                            self.set_task_names()
+                        else:
+                            print "Too many buttons in category, task not added"
                     else:
-                        print "Too many buttons in category, task not added"
+                        print "Category", self.cat, "does not exist in", self.buttons_text
                 elif task_mode == 1:
                     if len(self.buttons_text) < 6:
-                        self.buttons_text.append([t])
-                        self.setcnames()
+                        if new_text not in self.buttons_text:
+                            self.buttons_text[new_text] = []
+                            self.set_category_names()
+                        print "Category", new_text, "already exists in", self.buttons_text
                     else:
-                        print "Too many Categories, task not added"
+                        print "Too many Categories, Category not added"
                 elif task_mode == 2:
-                    import time
-
-                    print "Writing", self.buttons_text[self.cat - 1][0] + "," + t, "on", time.asctime()
-                    self.checkdir()
-                    f = self.open_file("log.csv", 'a')
-                    f.write(time.asctime() + "," + self.buttons_text[self.cat - 1][0] + "," + str(t) + "," + str(
-                        time.time()) + "\n")
-                    f.close()
-                    self.close()
+                    self.writetask(self.cat, new_text)
                 self.otherstring.set("")
         else:  # DELETE mode
-            if task_mode == 2:
+            if task_mode == 0:
+                self.buttons_text[self.cat].remove(new_text) # deletes the task from the dict
+                self.set_task_names()
+            elif task_mode == 1:
+                del self.buttons_text[new_text] # Deletes the full category
+                self.set_category_names()
+            elif task_mode == 2:
                 self.dellastlogline()
-
-    def writetolog(self, dat=0):
-        if dat == 0:  # TODO What does this do?
-            f = self.open_file("log.csv", 'a')
-            f.write(time.asctime() + "," + self.buttons_text[self.cat - 1][0] + "," + str(time.time()) + "\n")
-            f.close()
-        else:
-            f = self.open_file("log.csv", 'a')
-            f.write(time.asctime() + "," + self.buttons_text[self.cat - 1][0] + "," + str(time.time()) + "\n")
-            f.close()
 
     def graph(self):
         # gui = os.popen(runstring)  # TODO fix this
@@ -250,27 +238,27 @@ class TimeKeeper():
         if mode == 1:
             self.tasklabel["text"] = "Add:"
             if tv == 0:
-                self.custom["background"] = "purple"
-                self.custom["text"] = "Add Task:"
+                self.add_del_button["background"] = "purple"
+                self.add_del_button["text"] = "Add Task:"
             elif tv == 1:
-                self.custom["background"] = "orange"
-                self.custom["text"] = "Add Category:"
+                self.add_del_button["background"] = "orange"
+                self.add_del_button["text"] = "Add Category:"
             elif tv == 2:
-                self.custom["background"] = "purple"
-                self.custom["text"] = "Add Temp Task:"
+                self.add_del_button["background"] = "purple"
+                self.add_del_button["text"] = "Add Temp Task:"
         else:
             self.tasklabel["text"] = "Del:"
             if tv == 0:
-                self.custom["background"] = "red"
-                self.custom["text"] = "Select Task to Delete          /\\"
+                self.add_del_button["background"] = "red"
+                self.add_del_button["text"] = "Select Task to Delete          /\\"
                 self.set_task_names()
             elif tv == 1:
-                self.custom["background"] = "red"
-                self.custom["text"] = "Select Category to Delete   /\\"
-                self.setcnames()
+                self.add_del_button["background"] = "red"
+                self.add_del_button["text"] = "Select Category to Delete   /\\"
+                self.set_category_names()
             elif tv == 2:
-                self.custom["background"] = "red"
-                self.custom["text"] = "Delete last Log Entry"
+                self.add_del_button["background"] = "red"
+                self.add_del_button["text"] = "Delete last Log Entry"
 
     def dellastlogline(self):
         print "Deleting last Log entry"
@@ -295,14 +283,11 @@ class TimeKeeper():
     def testwrite(self):
         self.master.destroy()
 
-    def writetask(self, i, j):
-        print "Writing", self.buttons_text[i - 1][0] + "," + self.buttons_text[i - 1][j], "at", time.asctime()
-        if i <= len(self.buttons_text[i - 1]):
-            f = self.open_file("log.csv", 'a')
-            f.write(
-                time.asctime() + "," + self.buttons_text[i - 1][0] + "," + self.buttons_text[i - 1][j] + "," + str(
-                    time.time()) + "\n")
-            f.close()
+    def writetask(self, category_name, task_name):
+        print "Writing", category_name + "," + task_name, "at", time.asctime()
+        f = self.open_file("log.csv", 'a')
+        f.write(time.asctime() + "," + category_name + "," + task_name + "," + str(time.time()) + "\n")
+        f.close()
 
     def writetime(self, t):
         print "Writing", t, "to time log on", time.asctime()
@@ -311,18 +296,17 @@ class TimeKeeper():
         f.close()
 
     def buttonhandle(self, task_num):
-        self.midb = task_num
+        self.midb = task_num - 1
         tv = self.typeval.get()
         if self.mode == ADD:
-            self.writetask(self.cat, task_num)
+            self.writetask(self.buttons_text[self.cat - 1][0], self.buttons_text[self.cat - 1][task_num])
             self.close()
         if self.mode == DELETE:
             if tv == 0:
-                self.buttons_text[self.cat - 1][task_num] = ""
-                self.buttons_text[self.cat - 1].remove("")
+                del self.buttons_text[self.cat - 1][task_num]
             elif tv == 1:
-                self.buttons_text.remove(self.buttons_text[task_num - 1])
-                self.setcnames()
+                del self.buttons_text[task_num - 1]
+                self.set_category_names()
             self.set_task_names()
 
     def category_button(self, cat_num):
@@ -352,13 +336,13 @@ class TimeKeeper():
                     self.tasks[task_num]["background"] = "red"
                 self.tasks[task_num].pack()
 
-    def setcnames(self):
+    def set_category_names(self):
         print "Resetting category button names"
-        for button in self.category:
+        for button in self.categories:
             button.pack_forget()
         for index, text in enumerate(self.buttons_text):
-            self.category[index]["text"] = text[0]
-            self.category[index].pack()
+            self.categories[index]["text"] = text[0]
+            self.categories[index].pack()
 
     def writenewfile(self):
 
@@ -409,7 +393,7 @@ class TimeKeeper():
             self.readfile()
 
     def run(self):
-        self.setcnames()
+        self.set_category_names()
         self.set_task_names()
         self.master.mainloop()
         self.writetime(str(time.time() - self.t))
