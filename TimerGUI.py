@@ -128,10 +128,10 @@ class TimeKeeper():
             category_button.pack_forget()
             category_button.destroy()
         self.categories = []
-        for index, category_name in enumerate(self.buttons_text):
-            print  category_name
+        for index  in range(5):
             button_call = partial(self.category_button_handle, index)
-            self.categories.append(self.makebutton(self.containerleft, category_name, button_call, "orange"))
+            self.categories.append(self.makebutton(self.containerleft, "", button_call, "orange"))
+        self.set_category_names()
 
     def build_tasks(self):
         print "Assigning Category buttons"
@@ -337,14 +337,15 @@ class TimeKeeper():
                 task.pack()
         else:
             print "Resetting task buttons to", self.cat
-            for task_num, task_text in enumerate(self.buttons_text[self.cat]):  # Gets all the tasks from the text tuple
-                task = self.tasks[task_num]
-                task["text"] = task_text
-                if self.mode == ADD:
-                    task["background"] = "purple"
-                else:
-                    task["background"] = "red"
-                task.pack()
+            if self.cat in self.buttons_text:
+                for task_num, task_text in enumerate(self.buttons_text[self.cat]):  # Gets all the tasks from the text tuple
+                    task = self.tasks[task_num]
+                    task["text"] = task_text
+                    if self.mode == ADD:
+                        task["background"] = "purple"
+                    else:
+                        task["background"] = "red"
+                    task.pack()
 
     def set_category_names(self):
         print "Resetting category button names"
