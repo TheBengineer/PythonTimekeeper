@@ -32,7 +32,6 @@ class TimeKeeper():
             print "Because you have a mac, this program will now crash."
             exit()
 
-
         self.categories = []
         self.tasks = []
         self.buttons_text = {}
@@ -120,6 +119,8 @@ class TimeKeeper():
         self.rbtype[0].pack(anchor=tk.W)
         self.rbtype[1].pack(anchor=tk.W)
         self.rbtype[2].pack(anchor=tk.W)
+        self.textframe.config(width = 662, height = 85)
+        self.textframe.pack_propagate(False)
 
     def build_categories(self):
         print "Building Category buttons"
@@ -214,10 +215,10 @@ class TimeKeeper():
                 self.otherstring.set("")
         else:  # DELETE mode
             if task_mode == 0:
-                self.buttons_text[self.cat].remove(new_text) # deletes the task from the dict
+                self.buttons_text[self.cat].remove(new_text)  # deletes the task from the dict
                 self.set_task_names()
             elif task_mode == 1:
-                del self.buttons_text[new_text] # Deletes the full category
+                del self.buttons_text[new_text]  # Deletes the full category
                 self.set_category_names()
             elif task_mode == 2:
                 self.dellastlogline()
