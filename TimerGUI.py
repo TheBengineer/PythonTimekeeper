@@ -400,6 +400,7 @@ class TimeKeeper():
                     if lastline:
                         self.buttons_text[lastline].append(line[0:-1])
             f.close()
+            self.cat = lastline
         else:
             self.writenewfile()
             self.readfile()
