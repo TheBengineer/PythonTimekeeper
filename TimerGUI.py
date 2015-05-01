@@ -408,8 +408,6 @@ class TimeKeeper():
         self.set_category_names()
         self.set_task_names()
         self.master.mainloop()
-        self.writetime(str(time.time() - self.t))
-        exit()
 
 
 if __name__ == "__main__":

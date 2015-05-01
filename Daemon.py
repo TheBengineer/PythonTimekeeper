@@ -8,4 +8,4 @@ while 1:
     t = TimerGUI.TimeKeeper()
     t.run()
     print "\n Running again in 15 minutes"
-    time.sleep(60*15)
+    time.sleep(60*5)
