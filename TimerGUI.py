@@ -35,12 +35,12 @@ class TimeKeeper():
         self.categories = []
         self.tasks = []
         self.buttons_text = {}
+        self.readfile()
 
         self.misc = []
         self.rbmode = []
         self.rbtype = []
-        self.cat = 1
-        self.midb = 1
+        self.cat = self.buttons_text.keys()[0]
         self.mode = ADD
         self.custom = {}
 
@@ -83,7 +83,6 @@ class TimeKeeper():
         self.tasklabel.pack(side=tk.RIGHT, anchor=tk.NE)
         # Set up window framework --/\ /\ /\--
 
-        self.readfile()
         self.build_categories()
 
         self.add_del_button = tk.Button(self.textframe, text="Add Task:", font="Arial 27 bold",
@@ -94,6 +93,7 @@ class TimeKeeper():
 
         self.otherstring = tk.StringVar()
         self.othertext = tk.Entry(self.textframe, font=self.bfont, textvariable=self.otherstring)
+        self.othertext.bind("<Return>", self.add_del_tasks)
         self.othertext.pack(side=tk.RIGHT)
 
         self.misc.append(self.makebutton(self.containerright, "OOPS", self.oops, 'red', self.bfont))
@@ -129,7 +129,8 @@ class TimeKeeper():
             category_button.destroy()
         self.categories = []
         for index, category_name in enumerate(self.buttons_text):
-            button_call = partial(self.category_button, index)
+            print  category_name
+            button_call = partial(self.category_button_handle, index)
             self.categories.append(self.makebutton(self.containerleft, category_name, button_call, "orange"))
 
     def build_tasks(self):
@@ -138,8 +139,8 @@ class TimeKeeper():
             task_button.pack_forget()
             task_button.destroy()
         self.tasks = []
-        for index in range(1, 6):
-            button_call = partial(self.buttonhandle, index)
+        for index in range(5):
+            button_call = partial(self.task_button_handle, index)
             self.tasks.append(self.makebutton(self.containermid, "", button_call, "purple"))
         self.set_task_names()
 
@@ -187,7 +188,7 @@ class TimeKeeper():
             print "No file found"
             return 0
 
-    def add_del_tasks(self):
+    def add_del_tasks(self, event=None):
         add_mode = self.modeval.get()
         task_mode = self.typeval.get()
         new_text = self.othertext.get()
@@ -215,13 +216,18 @@ class TimeKeeper():
                 self.otherstring.set("")
         else:  # DELETE mode
             if task_mode == 0:
+                pass # This is handled by clicking on a task button
                 self.buttons_text[self.cat].remove(new_text)  # deletes the task from the dict
                 self.set_task_names()
             elif task_mode == 1:
+                pass # This is handled by clicking on a task button
                 del self.buttons_text[new_text]  # Deletes the full category
                 self.set_category_names()
             elif task_mode == 2:
                 self.dellastlogline()
+        self.writefile()
+        self.set_category_names()
+        self.set_task_names()
 
     def graph(self):
         # gui = os.popen(runstring)  # TODO fix this
@@ -233,10 +239,10 @@ class TimeKeeper():
         f.close()
 
     def setcustom(self):
-        mode = self.modeval.get()
+        self.mode = self.modeval.get()
         tv = self.typeval.get()
         self.set_task_names()
-        if mode == 1:
+        if self.mode == 1:
             self.tasklabel["text"] = "Add:"
             if tv == 0:
                 self.add_del_button["background"] = "purple"
@@ -296,53 +302,57 @@ class TimeKeeper():
         f.write(time.asctime() + "," + t + "\n")
         f.close()
 
-    def buttonhandle(self, task_num):
-        self.midb = task_num - 1
+    def task_button_handle(self, task_num):
         tv = self.typeval.get()
+        print self.mode
         if self.mode == ADD:
-            self.writetask(self.buttons_text[self.cat - 1][0], self.buttons_text[self.cat - 1][task_num])
+            self.writetask(self.cat, self.buttons_text[self.cat][task_num])
             self.close()
         if self.mode == DELETE:
             if tv == 0:
-                del self.buttons_text[self.cat - 1][task_num]
+                del self.buttons_text[self.cat][task_num]
             elif tv == 1:
-                del self.buttons_text[task_num - 1]
+                del self.buttons_text[self.tasks[task_num]["text"]]
                 self.set_category_names()
             self.set_task_names()
 
-    def category_button(self, cat_num):
-        self.cat = cat_num
+    def category_button_handle(self, cat_num):
+        self.cat = self.categories[cat_num]["text"]
         self.set_task_names()
+        self.set_category_names()
+        self.categories[cat_num]["background"] = "orange4"
 
     def set_task_names(self):
         for task in self.tasks:
             task.pack_forget()
         if self.typeval.get() == 1:
             print "Resetting task buttons to category names"
-            for i in range(len(self.buttons_text)):
-                self.tasks[i]["text"] = self.buttons_text[i][0]
+            for index, category in enumerate(self.buttons_text):
+                task = self.tasks[index]
+                task["text"] = category
                 if self.mode == ADD:
-                    self.tasks[i]["background"] = "purple"
+                    task["background"] = "purple"
                 else:
-                    self.tasks[i]["background"] = "red"
-                self.tasks[i].pack()
+                    task["background"] = "red"
+                task.pack()
         else:
-            print "Resetting task buttons to", self.buttons_text[self.cat - 1][0]
-            for task_num, task_text in enumerate(
-                    self.buttons_text[self.cat - 1][1:]):  # Gets all the tasks from the text tuple
-                self.tasks[task_num]["text"] = task_text
+            print "Resetting task buttons to", self.cat
+            for task_num, task_text in enumerate(self.buttons_text[self.cat]):  # Gets all the tasks from the text tuple
+                task = self.tasks[task_num]
+                task["text"] = task_text
                 if self.mode == ADD:
-                    self.tasks[task_num]["background"] = "purple"
+                    task["background"] = "purple"
                 else:
-                    self.tasks[task_num]["background"] = "red"
-                self.tasks[task_num].pack()
+                    task["background"] = "red"
+                task.pack()
 
     def set_category_names(self):
         print "Resetting category button names"
         for button in self.categories:
             button.pack_forget()
         for index, text in enumerate(self.buttons_text):
-            self.categories[index]["text"] = text[0]
+            self.categories[index]["text"] = text
+            self.categories[index]["background"] = "orange"
             self.categories[index].pack()
 
     def writenewfile(self):
@@ -369,25 +379,25 @@ class TimeKeeper():
         self.checkdir()
         print "writing changes to new config file"
         f = self.open_file("config.cfg", "w")
-        for i in range(len(self.buttons_text)):
-            for j in range(len(self.buttons_text[i])):
-                if j == 0:
-                    f.write("[" + self.buttons_text[i][j])
-                else:
-                    f.write(self.buttons_text[i][j])
+        for category_name in self.buttons_text:
+            f.write("[" + category_name+"\n")
+            for task_name in self.buttons_text[category_name]:
+                f.write(task_name)
                 f.write("\n")
         f.close()
 
     def readfile(self):
         print "Reading config file"
-        self.buttons_text = []
         if self.checkfile():
             f = self.open_file("config.cfg", "r")
+            lastline = None
             for line in f.readlines():
                 if line[0] == "[":
-                    self.buttons_text.append([line[1:-1]])
+                    self.buttons_text[line[1:-1]] = []
+                    lastline = line[1:-1]
                 else:
-                    self.buttons_text[len(self.buttons_text) - 1].append(line[0:-1])
+                    if lastline:
+                        self.buttons_text[lastline].append(line[0:-1])
             f.close()
         else:
             self.writenewfile()
