@@ -1,19 +1,22 @@
 __author__ = 'boh01'
 
-
 import csv
 import Tkinter
 import os
+import random
+import math
+
 
 def pluck(iterable, key, value):
     for index, item in enumerate(iterable):
         if item[key] == value:
-             return index
+            return index
     return None
+
 
 home_dir = os.path.join(os.getenv("APPDATA"), "Timekeeper")
 log_filename = os.path.join(home_dir, "log.csv")
-log_file = open(log_filename,"rb")
+log_file = open(log_filename, "rb")
 raw_data = csv.reader(log_file)
 raw_entries = []
 for entry in raw_data:
@@ -21,13 +24,12 @@ for entry in raw_data:
 
 events = []
 for index, entry in enumerate(raw_entries):
-    print entry
     duration = 0
     try:
-        duration = float(entry[3]) - float(raw_entries[index-1][3])
+        duration = float(entry[3]) - float(raw_entries[index - 1][3])
     except IndexError:
         pass
-    if duration > 0 and duration < 3600*5: # 5 hours
+    if duration > 0 and duration < 3600 * 5:  # 5 hours
         event = {}
         event["date"] = entry[0]
         event["category"] = entry[1]
@@ -39,31 +41,27 @@ for index, entry in enumerate(raw_entries):
 categories = {}
 
 for event in events:
-    if not pluck(categories,0, event["category"]):
+    if event["category"] not in categories:
         categories[event["category"]] = event["duration"]
     else:
-        categories[event["category"]][1] += event["duration"]
+        categories[event["category"]] += event["duration"]
 
-print categories
-
-t = 0
+total_time = 0
 for c in categories:
-    t += categories[c]
-print t
+    total_time += categories[c]
 
-exit()
-for j in entry[0:2]:
-    try:
-        d.append(float(j))
-    except:
-        d = []
-if d !=[]:
-    raw_data.append(d)
-exit()
-c = Tkinter.Canvas(width=200, height=200)
+time_per_degree = total_time / 360.0
+
+c = Tkinter.Canvas(width=800, height=800)
 c.pack()
-c.create_line(1,1,40,54.2)
-for i in range(len(data)-1):
-        c.create_line(1,1,40,64.2)
-        c.create_line(data[i][0],data[i][1],data[i+1][0],data[i+1][1],fill = "black")
+c.create_line(1, 1, 40, 54.2)
+last_slice = 0
+colors = ["red", "orange", "yellow", "green", "blue", "violet"]
+for category in categories:
+    bit = categories[category]/time_per_degree
+    c.create_arc(300, 300, 500, 500, style=Tkinter.PIESLICE, fill = random.choice(colors) ,start=last_slice, extent=bit)
+    c.create_text(400+(math.cos(math.degrees(last_slice+(bit/2.0)))*50),
+                  400+(math.sin(math.degrees(last_slice+(bit/2.0)))*50),
+                  text = category)
+    last_slice += bit
 c.mainloop()
