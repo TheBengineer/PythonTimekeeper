@@ -45,6 +45,12 @@ for event in events:
         categories[event["category"]][1] += event["duration"]
 
 print categories
+
+t = 0
+for c in categories:
+    t += categories[c]
+print t
+
 exit()
 for j in entry[0:2]:
     try:
