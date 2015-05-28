@@ -3,7 +3,6 @@ __author__ = 'boh01'
 import csv
 import Tkinter
 import os
-import random
 import math
 
 
@@ -46,6 +45,7 @@ for event in events:
         categories[event["category"]] = event["duration"]
     else:
         categories[event["category"]] += event["duration"]
+sorted_categories = sorted(categories.items(), key=lambda x: x[1])
 
 tasks = {}
 for event in events:
@@ -56,15 +56,9 @@ for event in events:
     else:
         tasks[event["category"]][event["task"]] += event["duration"]
 
-print tasks
-print categories
-
-sorted_categories = sorted(categories.items(), key=lambda x: x[1])
 sorted_tasks = []
 for c in reversed(sorted_categories):
-    sorted_tasks.append((c,  sorted(tasks[c[0]].items(), key=lambda x: x[1], reverse=True)))
-print sorted_tasks
-print  sorted(tasks.items(), key=lambda x: x[1])
+    sorted_tasks.append((c, sorted(tasks[c[0]].items(), key=lambda x: x[1], reverse=True)))
 
 total_time = 0
 for c in sorted_categories:
@@ -74,30 +68,54 @@ time_per_degree = total_time / 360.0
 
 c = Tkinter.Canvas(width=800, height=800)
 c.pack()
-c.create_line(1, 1, 40, 54.2)
-last_slice = 90
-colors = ["red", "orange", "yellow", "green", "blue", "violet"]
 
-for task in tasks:
-    bit = tasks[task] / time_per_degree
-    c.create_arc(250, 250, 550, 550, style=Tkinter.PIESLICE, fill=random.choice(colors), start=last_slice, extent=bit)
-    c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 210),
-                  400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 210),
-                  text=task)
-    last_slice += bit
+
+def color(a, b=None):
+    import random
+
+    random.seed(a)
+    x = [random.random(), random.random(), random.random()]
+    if b:
+        random.seed(b)
+        y = [random.random(), random.random(), random.random()]
+    else:
+        y = [0, 0, 0]
+    c = "#"
+    for i, n in enumerate(x):
+        number = int((x[i] * 3600) + (y[i] * 400))
+        c += hex(number)[2:].rjust(3, "0")
+    return c
+
+
+last_slice = 90
+for category in sorted_tasks:
+    print category[1]
+    for task in category[1]:
+        bit =- task[1] / time_per_degree
+        c.create_arc(100, 100, 700, 700, style=Tkinter.PIESLICE, fill=color(category[0][0], task[0]), start=last_slice,
+                     extent=bit)
+        if bit > 10:
+            c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 170),
+                          400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 170),
+                          text=task[0])
+        else:
+            c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 320),
+                          400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 320),
+                          text=task[0])
+        last_slice += bit
 
 last_slice = 90
 
 for category in sorted_categories:
     bit = category[1] / time_per_degree
-    c.create_arc(300, 300, 500, 500, style=Tkinter.PIESLICE, fill=random.choice(colors), start=last_slice, extent=bit)
+    c.create_arc(300, 300, 500, 500, style=Tkinter.PIESLICE, fill=color(category[0]), start=last_slice, extent=bit)
     if bit > 20:
-        c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 70),
-                      400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 70),
+        c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 60),
+                      400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 60),
                       text=category[0])
     else:
-        c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 110),
-                      400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 110),
+        c.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 120),
+                      400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 120),
                       text=category[0])
     last_slice += bit
 c.mainloop()
