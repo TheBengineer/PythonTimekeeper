@@ -4,6 +4,7 @@ import csv
 import Tkinter
 import os
 import math
+import ttk
 
 
 def pluck(iterable, key, value):
@@ -66,6 +67,7 @@ for c in sorted_categories:
 
 time_per_degree = total_time / 360.0
 
+
 c = Tkinter.Canvas(width=800, height=800)
 c.pack()
 
@@ -118,4 +120,5 @@ for category in sorted_categories:
                       400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 120),
                       text=category[0])
     last_slice += bit
+
 c.mainloop()
