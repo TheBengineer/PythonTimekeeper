@@ -35,7 +35,8 @@ class Window(Thread):
         self.toolbar.add_cascade(label="File", menu=self.filemenu)
         self.toolbar.add_command(label="Poll", command=self.runPoll)
         self.toolbar.add_command(label="Set Timer", command=self.setTimer)
-        self.toolbar.add_command(label="Refresh Graph", command=self.draw_graph)
+        self.toolbar.add_command(label="Refresh Graph", command=self.custom_graph)
+        self.toolbar.add_command(label="Refresh Full Graph", command=self.draw_graph)
         self.toolbar.add_command(label="Quit", command=self.window.quit)
         self.window.config(menu=self.toolbar)
 
@@ -67,7 +68,7 @@ class Window(Thread):
         if self.timer < 1:
             self.timer = 1
         self.jobs.append(self.window.after(int(self.timer * 1000), self.runPoll))
-        self.draw_graph()
+        self.custom_graph()
         t.run()
         print "Here"
 
@@ -77,6 +78,9 @@ class Window(Thread):
 
     def run(self):
         self.jobs.append(self.window.after(0, self.runPoll))
+
+    def custom_graph(self):
+        self.draw_graph(["Ben"])
 
     def draw_graph(self, disable=None, enable=None):
 
@@ -139,13 +143,15 @@ class Window(Thread):
                 categories[event["category"]] = event["duration"]
             else:
                 categories[event["category"]] += event["duration"]
+
+        if disable:
+            for category in disable:
+                del categories[category]
+
         if enable:
             for category in categories.keys():
                 if category not in enable:
                     del categories[category]
-        if disable:
-            for category in disable:
-                del categories[category]
 
         sorted_categories = sorted(categories.items(), key=lambda x: x[1])
 
