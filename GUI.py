@@ -20,6 +20,7 @@ class Window(Thread):
         # Variables
 
         self.timer = 5 * 60
+        self.jobs = []
 
 
         # Menu bar
@@ -27,8 +28,10 @@ class Window(Thread):
 
         self.filemenu = tk.Menu(self.toolbar, tearoff=0)
         self.filemenu.add_separator()
+        self.filemenu.add_command(label="Poll", command=self.runPoll)
         self.filemenu.add_command(label="Exit", command=self.toolbar.quit)
         self.toolbar.add_cascade(label="File", menu=self.filemenu)
+        self.toolbar.add_command(label="Poll", command=self.runPoll)
         self.toolbar.add_command(label="Set Timer", command=self.setTimer)
         self.toolbar.add_command(label="Quit", command=self.window.quit)
         self.window.config(menu=self.toolbar)
@@ -57,15 +60,20 @@ class Window(Thread):
 
     def runPoll(self):
         t = TimerGUI.TimeKeeper()
+        while len(self.jobs):
+            job = self.jobs.pop()
+            self.window.after_cancel(job)
+        self.jobs.append(self.window.after(self.timer*1000, self.runPoll))
         t.run()
-        self.window.after(self.timer, self.runPoll)
+        print "Here"
+
 
     def setTimer(self):
         tmp_pop = popupWindow(self.window, self)
         self.window.wait_window(tmp_pop.top)
 
     def run(self):
-        self.window.after(self.timer, self.runPoll)
+        self.jobs.append(self.window.after(0, self.runPoll))
         self.window.mainloop()
 
 
@@ -81,11 +89,12 @@ class popupWindow(object):
         self.e.pack()
         self.b = tk.Button(top, text='Apply', command=self.cleanup)
         self.b.pack()
+        self.e.bind('<Return>', self.cleanup)
 
-    def cleanup(self):
+    def cleanup(self, event=None):
         self.value = self.e.get()
         try:
-            self.value = int(self.value)
+            self.value = float(self.value)
         except ValueError:
             self.value = 5 * 60
             self.l2.config(text="Value cannot be converted to a number. Try again")
