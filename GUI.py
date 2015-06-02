@@ -208,7 +208,6 @@ class Window(Thread):
                                               text=category[0])
             last_slice += bit
 
-
 class popupWindow(object):
     def __init__(self, master, window):
         self.parent = window
@@ -223,6 +222,7 @@ class popupWindow(object):
         self.b.pack()
         self.e.bind('<Return>', self.cleanup)
         self.e.focus()
+        top.lift()
 
     def cleanup(self, event=None):
         self.value = self.e.get()
