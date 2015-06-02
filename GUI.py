@@ -3,7 +3,9 @@ __author__ = 'boh01'
 from threading import Thread
 import os
 import Tkinter as tk
-import time
+import ttk
+import math
+import csv
 
 import TimerGUI
 
@@ -13,7 +15,7 @@ class Window(Thread):
         Thread.__init__(self)
 
         self.window = tk.Tk()  # Init
-        self.window.geometry("900x500+300+300")
+        self.window.geometry("900x800+300+300")
         self.window.title("Time Tracker - Ben Holleran June 2015")
         self.window.protocol("WM_DELETE_WINDOW", self.onQuit)
 
@@ -33,6 +35,7 @@ class Window(Thread):
         self.toolbar.add_cascade(label="File", menu=self.filemenu)
         self.toolbar.add_command(label="Poll", command=self.runPoll)
         self.toolbar.add_command(label="Set Timer", command=self.setTimer)
+        self.toolbar.add_command(label="Refresh Graph", command=self.draw_graph)
         self.toolbar.add_command(label="Quit", command=self.window.quit)
         self.window.config(menu=self.toolbar)
 
@@ -44,8 +47,11 @@ class Window(Thread):
         self.poll_button = tk.Button(self.main_frame, text="Scan VIS")
         self.menu_frame.pack(side="top", expand=1)
 
-        # self.nb =  ttk.Notebook(self.main_frame, name='notebook')
-        # self.nb.enable_traversal()
+        self.graph_canvas = tk.Canvas(width=800, height=800)
+        self.graph_canvas.pack()
+
+        self.nb =  ttk.Notebook(self.window, name='notebook')
+        self.nb.enable_traversal()
         # self.nb.pack(fill=tk.BOTH, expand=tk.Y, padx=2, pady=3)
         # self.graph_frame = ttk.Frame(self.nb, name='graph')
         # self.time_frame = ttk.Frame(self.nb, name='time')
@@ -58,15 +64,18 @@ class Window(Thread):
         self.window.destroy()
         os._exit(1)
 
+
     def runPoll(self):
         t = TimerGUI.TimeKeeper()
         while len(self.jobs):
             job = self.jobs.pop()
             self.window.after_cancel(job)
-        self.jobs.append(self.window.after(self.timer*1000, self.runPoll))
+        if self.timer < 1:
+            self.timer = 1
+        self.jobs.append(self.window.after(int(self.timer * 1000), self.runPoll))
+        self.draw_graph()
         t.run()
         print "Here"
-
 
     def setTimer(self):
         tmp_pop = popupWindow(self.window, self)
@@ -75,6 +84,119 @@ class Window(Thread):
     def run(self):
         self.jobs.append(self.window.after(0, self.runPoll))
         self.window.mainloop()
+
+    def draw_graph(self):
+
+        self.graph_canvas.delete("all")
+
+        def pluck(iterable, key, value):
+            for index, item in enumerate(iterable):
+                if item[key] == value:
+                    return index
+            return None
+
+        def color(a, b=None):
+            import random
+
+            random.seed(a)
+            x = [random.random(), random.random(), random.random()]
+            if b:
+                random.seed(b)
+                y = [random.random(), random.random(), random.random()]
+            else:
+                y = [0, 0, 0]
+            c = "#"
+            for i, n in enumerate(x):
+                number = int((x[i] * 3600) + (y[i] * 400))
+                c += hex(number)[2:].rjust(3, "0")
+            return c
+
+        home_dir = os.path.join(os.getenv("APPDATA"), "Timekeeper")
+        log_filename = os.path.join(home_dir, "log.csv")
+        log_file = open(log_filename, "rb")
+        raw_data = csv.reader(log_file)
+        raw_entries = []
+        for entry in raw_data:
+            raw_entries.append(entry)
+
+
+        ##
+        events = []
+        for index, entry in enumerate(raw_entries):
+            duration = 0
+            try:
+                duration = float(entry[3]) - float(raw_entries[index - 1][3])
+            except IndexError:
+                pass
+            if duration > 0 and duration < 3600 * 5:  # 5 hours
+                event = {}
+                event["date"] = str(entry[0])
+                event["category"] = str(entry[1])
+                event["task"] = str(entry[2])
+                event["time"] = str(entry[3])
+                event["duration"] = duration
+                events.append(event)
+
+        categories = {}
+        for event in events:
+            if event["category"] not in categories:
+                categories[event["category"]] = event["duration"]
+            else:
+                categories[event["category"]] += event["duration"]
+        sorted_categories = sorted(categories.items(), key=lambda x: x[1])
+
+        tasks = {}
+        for event in events:
+            if event["category"] not in tasks:
+                tasks[event["category"]] = {}
+            if event["task"] not in tasks[event["category"]]:
+                tasks[event["category"]][event["task"]] = event["duration"]
+            else:
+                tasks[event["category"]][event["task"]] += event["duration"]
+
+        sorted_tasks = []
+        for category in reversed(sorted_categories):
+            sorted_tasks.append((category, sorted(tasks[category[0]].items(), key=lambda x: x[1], reverse=True)))
+
+        total_time = 0
+        for category in sorted_categories:
+            total_time += category[1]
+
+        time_per_degree = total_time / 360.0
+
+        last_slice = 90
+        for category in sorted_tasks:
+            print category[1]
+            for task in category[1]:
+                bit = - task[1] / time_per_degree
+                self.graph_canvas.create_arc(100, 100, 700, 700, style=tk.PIESLICE, fill=color(category[0][0], task[0]),
+                                             start=last_slice,
+                                             extent=bit)
+                if bit > 10:
+                    self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 170),
+                                                  400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 170),
+                                                  text=task[0])
+                else:
+                    self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 320),
+                                                  400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 320),
+                                                  text=task[0])
+                last_slice += bit
+
+        last_slice = 90
+
+        for category in sorted_categories:
+            bit = category[1] / time_per_degree
+            self.graph_canvas.create_arc(300, 300, 500, 500, style=tk.PIESLICE, fill=color(category[0]),
+                                         start=last_slice, extent=bit)
+            if bit > 20:
+                self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 60),
+                                              400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 60),
+                                              text=category[0])
+            else:
+                self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 120),
+                                              400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 120),
+                                              text=category[0])
+            last_slice += bit
 
 
 class popupWindow(object):
@@ -90,6 +212,7 @@ class popupWindow(object):
         self.b = tk.Button(top, text='Apply', command=self.cleanup)
         self.b.pack()
         self.e.bind('<Return>', self.cleanup)
+        self.e.focus()
 
     def cleanup(self, event=None):
         self.value = self.e.get()
