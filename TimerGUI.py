@@ -408,8 +408,8 @@ class TimeKeeper():
     def run(self):
         self.set_category_names()
         self.set_task_names()
+        self.master.lift()
         self.master.mainloop()
-        print "Exiting"
 
 
 if __name__ == "__main__":
