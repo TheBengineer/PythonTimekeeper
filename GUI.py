@@ -47,7 +47,7 @@ class Window(Thread):
         self.graph_frame = ttk.Frame(self.nb, name='graph')
         self.graph_canvas = tk.Canvas(self.graph_frame, width=800, height=800)
         self.time_frame = ttk.Frame(self.nb, name='time')
-        self.nb.add(self.graph_frame, text="Gragh")
+        self.nb.add(self.graph_frame, text="Graph")
         self.nb.add(self.time_frame, text="Time")
         self.nb.pack(fill=tk.BOTH, expand=tk.Y, padx=2, pady=3)
 
