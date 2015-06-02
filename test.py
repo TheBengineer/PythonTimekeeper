@@ -24,10 +24,10 @@ class asdf(Thread):
         self.nb =  ttk.Notebook(self.window, width=800, height=800)
         self.nb.enable_traversal()
         self.graph_frame = ttk.Frame(self.nb, name='graph')
-        self.graph_frame2 = ttk.Frame(self.nb, name='graph')
+        self.graph_frame2 = ttk.Frame(self.nb, name='graph2')
         self.time_frame = ttk.Frame(self.nb, name='time')
         self.nb.add(self.graph_frame, text="asdf")
-        self.nb.add(self.graph_frame2, text="asdf")
+        self.nb.add(self.graph_frame2, text="asdf2")
         self.nb.pack(fill=tk.BOTH, expand=tk.Y, padx=2, pady=3)
 
         #self.main_frame = tk.Frame(self.window)
@@ -38,7 +38,7 @@ class asdf(Thread):
         #self.poll_button = tk.Button(self.main_frame, text="Scan VIS")
         #self.menu_frame.pack(side="top", expand=1)
 
-        self.graph_canvas = tk.Canvas(self.nb, width=800, height=800)
+        self.graph_canvas = tk.Canvas(width=800, height=800)
         self.graph_canvas.pack()
 
         #self.nb =  ttk.Notebook(self.window, name='notebook')

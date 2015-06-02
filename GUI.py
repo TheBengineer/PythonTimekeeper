@@ -44,27 +44,14 @@ class Window(Thread):
         self.nb =  ttk.Notebook(self.window, width=800, height=800)
         self.nb.enable_traversal()
         self.graph_frame = ttk.Frame(self.nb, name='graph')
+        self.graph_canvas = tk.Canvas(self.graph_frame, width=800, height=800)
         self.time_frame = ttk.Frame(self.nb, name='time')
         self.nb.add(self.graph_frame, text="Gragh")
         self.nb.add(self.time_frame, text="Time")
         self.nb.pack(fill=tk.BOTH, expand=tk.Y, padx=2, pady=3)
 
-        #self.main_frame = tk.Frame(self.window)
-        #self.main_frame.pack(fill=tk.BOTH, expand=1)
-
-        #self.menu_frame = tk.Frame(self.main_frame)  # holds the buttons at the top
-
-        #self.poll_button = tk.Button(self.main_frame, text="Scan VIS")
-        #self.menu_frame.pack(side="top", expand=1)
-
-        self.graph_canvas = tk.Canvas(self.nb, width=800, height=800)
         self.graph_canvas.pack()
 
-        #self.nb =  ttk.Notebook(self.window, name='notebook')
-        #self.nb.enable_traversal()
-        #self.nb.pack(fill=tk.BOTH, expand=tk.Y, padx=2, pady=3)
-        # self.graph_frame = ttk.Frame(self.nb, name='graph')
-        # self.time_frame = ttk.Frame(self.nb, name='time')
 
     def onQuit(self):
         print "User aborted, quitting."
