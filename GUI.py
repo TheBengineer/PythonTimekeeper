@@ -41,7 +41,7 @@ class Window(Thread):
 
 
         # Window
-        self.nb =  ttk.Notebook(self.window, width=800, height=800)
+        self.nb = ttk.Notebook(self.window, width=800, height=800)
         self.nb.enable_traversal()
         self.graph_frame = ttk.Frame(self.nb, name='graph')
         self.graph_canvas = tk.Canvas(self.graph_frame, width=800, height=800)
@@ -52,14 +52,12 @@ class Window(Thread):
 
         self.graph_canvas.pack()
 
-
     def onQuit(self):
         print "User aborted, quitting."
         # self.RMAThread.interrupt_main()
         # self.VisThread.interrupt_main()
         self.window.destroy()
         os._exit(1)
-
 
     def runPoll(self):
         t = TimerGUI.TimeKeeper()
@@ -80,7 +78,7 @@ class Window(Thread):
     def run(self):
         self.jobs.append(self.window.after(0, self.runPoll))
 
-    def draw_graph(self):
+    def draw_graph(self, disable=None, enable=None):
 
         self.graph_canvas.delete("all")
 
@@ -108,8 +106,11 @@ class Window(Thread):
 
         home_dir = os.path.join(os.getenv("APPDATA"), "Timekeeper")
         log_filename = os.path.join(home_dir, "log.csv")
+        config_filename = os.path.join(home_dir, "config.cfg")
         log_file = open(log_filename, "rb")
+        config_file = open(log_filename, "rb")
         raw_data = csv.reader(log_file)
+        config_data = csv.reader(config_file)
         raw_entries = []
         for entry in raw_data:
             raw_entries.append(entry)
@@ -138,6 +139,14 @@ class Window(Thread):
                 categories[event["category"]] = event["duration"]
             else:
                 categories[event["category"]] += event["duration"]
+        if enable:
+            for category in categories.keys():
+                if category not in enable:
+                    del categories[category]
+        if disable:
+            for category in disable:
+                del categories[category]
+
         sorted_categories = sorted(categories.items(), key=lambda x: x[1])
 
         tasks = {}
