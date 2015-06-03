@@ -19,9 +19,11 @@ class Window(Thread):
         self.window.minsize(300, 300)
         self.window.title("Time Tracker - Ben Holleran June 2015")
         self.window.protocol("WM_DELETE_WINDOW", self.onQuit)
+        self.window.bind("<Configure>", self.resize)
 
         # Variables
 
+        self.graph_style = 1
         self.timer = 5 * 60
         self.jobs = []
 
@@ -70,7 +72,7 @@ class Window(Thread):
         if self.timer < 1:
             self.timer = 1
         self.jobs.append(self.window.after(int(self.timer * 1000), self.runPoll))
-        self.custom_graph()
+        self.resize()
         t.run()
         print "Here"
 
@@ -81,11 +83,19 @@ class Window(Thread):
     def run(self):
         self.jobs.append(self.window.after(0, self.runPoll))
 
+    def resize(self, event=None):
+        if self.graph_style == 1:
+            self.custom_graph()
+        else:
+            self.draw_graph()
+
     def custom_graph(self):
+        self.graph_style = 1
         self.draw_graph(["Ben"])
 
     def draw_graph(self, disable=None, enable=None):
-
+        if not disable:
+            self.graph_style = 0
         self.graph_canvas.delete("all")
 
         self.graph_frame.update()
@@ -191,7 +201,7 @@ class Window(Thread):
             for task in category[1]:
                 bit = - task[1] / time_per_degree
                 #bit = min(bit, -.3)
-                if bit < -.3:
+                if bit < -.5:
                     self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
                                              style=tk.PIESLICE, fill=color(category[0][0], task[0]), start=last_slice,
                                              extent=bit)
@@ -212,7 +222,8 @@ class Window(Thread):
 
         for category in sorted_categories:
             bit = category[1] / time_per_degree
-            self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
+            if bit > .5:
+                self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
                                          style=tk.PIESLICE, fill=color(category[0]), start=last_slice, extent=bit)
             if bit > 20:
                 self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
