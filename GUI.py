@@ -207,17 +207,20 @@ class Window(Thread):
 
         last_slice = 90
 
+        task_corners = ((center[0]- (min_size/4.0),center[1]- (min_size/4.0)),
+                        (center[0]+ (min_size/4.0),center[1]+ (min_size/4.0)))
+
         for category in sorted_categories:
             bit = category[1] / time_per_degree
-            self.graph_canvas.create_arc(300, 300, 500, 500, style=tk.PIESLICE, fill=color(category[0]),
-                                         start=last_slice, extent=bit)
+            self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
+                                         style=tk.PIESLICE, fill=color(category[0]), start=last_slice, extent=bit)
             if bit > 20:
-                self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 60),
-                                              400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 60),
+                self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
+                                              center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
                                               text=category[0])
             else:
-                self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 120),
-                                              400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 120),
+                self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.8),
+                                              center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.8),
                                               text=category[0])
             last_slice += bit
 
