@@ -15,7 +15,7 @@ class Window(Thread):
         Thread.__init__(self)
 
         self.window = tk.Tk()  # Init
-        self.window.geometry("800x800+300+300")
+        self.window.geometry("700x550+200+100")
         self.window.minsize(300, 300)
         self.window.title("Time Tracker - Ben Holleran June 2015")
         self.window.protocol("WM_DELETE_WINDOW", self.onQuit)
