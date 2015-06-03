@@ -16,6 +16,7 @@ class Window(Thread):
 
         self.window = tk.Tk()  # Init
         self.window.geometry("800x800+300+300")
+        self.window.minsize(300, 300)
         self.window.title("Time Tracker - Ben Holleran June 2015")
         self.window.protocol("WM_DELETE_WINDOW", self.onQuit)
 
@@ -42,14 +43,15 @@ class Window(Thread):
 
 
         # Window
-        self.nb = ttk.Notebook(self.window, width=800, height=800)
+        self.nb = ttk.Notebook(self.window)
         self.nb.enable_traversal()
         self.graph_frame = ttk.Frame(self.nb, name='graph')
-        self.graph_canvas = tk.Canvas(self.graph_frame, width=800, height=800)
+        self.graph_canvas = tk.Canvas(self.graph_frame)
+        self.graph_canvas.pack(fill=tk.BOTH, expand=True)
         self.time_frame = ttk.Frame(self.nb, name='time')
         self.nb.add(self.graph_frame, text="Graph")
         self.nb.add(self.time_frame, text="Time")
-        self.nb.pack(fill=tk.BOTH, expand=tk.Y, padx=2, pady=3)
+        self.nb.pack(fill=tk.BOTH, expand=True, padx=2, pady=3)
 
         self.graph_canvas.pack()
 
@@ -85,6 +87,11 @@ class Window(Thread):
     def draw_graph(self, disable=None, enable=None):
 
         self.graph_canvas.delete("all")
+
+        self.graph_frame.update()
+        size = (self.graph_frame.winfo_width(), self.graph_frame.winfo_height())
+        max_size = max(size)
+        min_size = min(size)
 
         def pluck(iterable, key, value):
             for index, item in enumerate(iterable):
@@ -175,12 +182,17 @@ class Window(Thread):
         time_per_degree = total_time / 360.0
 
         last_slice = 90
+
+        center = (size[0] / 2.0, size[1] / 2.0)
+        task_corners = ((center[0]- (min_size/2.0)+25,center[1]- (min_size/2.0)+25),
+                        (center[0]+ (min_size/2.0)-25,center[1]+ (min_size/2.0)-25))
+        self.graph_canvas.create_rectangle(0,0,size[0], size[1])
         for category in sorted_tasks:
             print category[1]
             for task in category[1]:
                 bit = - task[1] / time_per_degree
-                self.graph_canvas.create_arc(100, 100, 700, 700, style=tk.PIESLICE, fill=color(category[0][0], task[0]),
-                                             start=last_slice,
+                self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
+                                             style=tk.PIESLICE, fill=color(category[0][0], task[0]), start=last_slice,
                                              extent=bit)
                 if bit > 10:
                     self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 170),
@@ -207,6 +219,7 @@ class Window(Thread):
                                               400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 120),
                                               text=category[0])
             last_slice += bit
+
 
 class popupWindow(object):
     def __init__(self, master, window):
