@@ -188,19 +188,20 @@ class Window(Thread):
                         (center[0]+ (min_size/2.0)-25,center[1]+ (min_size/2.0)-25))
         self.graph_canvas.create_rectangle(0,0,size[0], size[1])
         for category in sorted_tasks:
-            print category[1]
             for task in category[1]:
                 bit = - task[1] / time_per_degree
-                self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
+                #bit = min(bit, -.3)
+                if bit < -.3:
+                    self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
                                              style=tk.PIESLICE, fill=color(category[0][0], task[0]), start=last_slice,
                                              extent=bit)
-                if bit > 10:
-                    self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 170),
-                                                  400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 170),
+                if bit > 3:
+                    self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 170),
+                                                  center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 170),
                                                   text=task[0])
                 else:
-                    self.graph_canvas.create_text(400 + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 320),
-                                                  400 + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 320),
+                    self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * 320),
+                                                  center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * 320),
                                                   text=task[0])
                 last_slice += bit
 
