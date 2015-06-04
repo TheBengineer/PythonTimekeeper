@@ -22,6 +22,7 @@ class TimeKeeper():
         self.mfont = "Arial 30 bold"
 
         self.system = os.sys.platform
+        self.master.after(5*60*1000,self.master.destroy)
 
         if self.system == "linux2":
             self.directory = os.getenv("HOME")
