@@ -205,14 +205,14 @@ class Window(Thread):
                     self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
                                              style=tk.PIESLICE, fill=color(category[0][0], task[0]), start=last_slice,
                                              extent=bit)
-                if bit < -10:
-                    self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.0),
-                                                  center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.0),
-                                                  text=task[0])
-                else:
-                    self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/2.1),
-                                                  center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/2.1),
-                                                  text=task[0])
+                    if bit < -10:
+                        self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.0),
+                                                      center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.0),
+                                                      text=task[0])
+                    else:
+                        self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/2.1),
+                                                      center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/2.1),
+                                                      text=task[0])
                 last_slice += bit
 
         last_slice = 90
@@ -225,14 +225,14 @@ class Window(Thread):
             if bit > .5:
                 self.graph_canvas.create_arc(task_corners[0][0], task_corners[0][1], task_corners[1][0], task_corners[1][1],
                                          style=tk.PIESLICE, fill=color(category[0]), start=last_slice, extent=bit)
-            if bit > 20:
-                self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
-                                              center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
-                                              text=category[0])
-            else:
-                self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.8),
-                                              center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.8),
-                                              text=category[0])
+                if bit > 20:
+                    self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
+                                                  center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/8.0),
+                                                  text=category[0])
+                else:
+                    self.graph_canvas.create_text(center[0] + (math.cos(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.8),
+                                                  center[1] + (math.sin(-math.radians((last_slice + (bit / 2.0)))) * min_size/3.8),
+                                                  text=category[0])
             last_slice += bit
 
 
